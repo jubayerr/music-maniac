@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const lyricsFinder = require('lyrics-finder')
 const SpotifyWebApi = require('spotify-web-api-node')
 
 const app = express()
@@ -18,9 +20,9 @@ app.get('/', (req, res) => {
 app.post('/refresh', (req, res) => {
     const refreshToken = req.body.refreshToken
     const spotifyApi = new SpotifyWebApi({
-        redirectUri: 'http://localhost:3000',
-        clientId: 'b3fd0d79c00b459a9f58561f40ba54a4',
-        clientSecret: '9813af36187d45faa18bc4e7f925b0d5',
+        redirectUri: process.env.REDIRECT_URI,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
         refreshToken
     })
 
@@ -60,6 +62,10 @@ app.post('/login', (req, res) => {
         })
 })
 
+app.get('/lyrics', async (req, res) => {
+    const lyrics = await lyricsFinder(req.query.artist, req.query.track) || "Ops. No Lyrics Found."
+    res.json({ lyrics })
+})
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
